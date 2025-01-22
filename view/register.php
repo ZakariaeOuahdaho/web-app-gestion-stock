@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   }
 
   if (empty($errors)) {
-    $stmt = $conn->prepare("INSERT INTO user (nom, prenom, email, password, role) VALUES (?, ?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO users (nom, prenom, email, password, role) VALUES (?, ?, ?, ?, ?)");
     $stmt->bind_param("sssss", $nom, $prenom, $email, $password, $role);
 
     if ($stmt->execute()) {
@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="">
+  <link rel="stylesheet" href="../css/register.css">
   <title>Register</title>
 
 </head>
