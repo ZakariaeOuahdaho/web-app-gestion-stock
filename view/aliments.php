@@ -8,17 +8,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $quantite = (int)$_POST['quantite'];
   $prix_unitaire = (float)$_POST['prix_unitaire'];
 
-  $sql = "INSERT INTO produits (reference, nom, quantite, prix_unitaire) VALUES (?, ?, ?, ?)";
+  $sql = "INSERT INTO commandes_fournisseurs (reference, nom, quantite, prix_unitaire, categorie) VALUES (?, ?, ?, ?, 'aliments')";
   $stmt = $conn->prepare($sql);
   $stmt->bind_param("ssid", $reference, $nom, $quantite, $prix_unitaire);
 
   if ($stmt->execute()) {
-    header('Location: stock_page.php');
+    header('Location: aliments.php');
     exit();
   }
 }
 
-$sql = "SELECT * FROM produits";
+$sql = "SELECT * FROM commandes_fournisseurs WHERE categorie = 'aliments'";
 $result = $conn->query($sql);
 ?>
 
@@ -28,17 +28,13 @@ $result = $conn->query($sql);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../css/stock_pagestyle.css">
-  <title>Gestion des Stocks</title>
+  <title>Commandes Fournisseurs - Aliments</title>
 </head>
 <body>
-
-
 <div class="sidebar">
-  <h2>Gestion Produits</h2>
+  <h2>Gestion Fournisseurs</h2>
   <a href="../view/pagedaccueil.php">Retour au Home</a>
-  <a href="../utilities/edit_product.php">Modifier un produit</a>
-  <a href="../utilities/dashboard.php">Dashboard</a>
-  <a href="gestionfournisseur.php">Gestion des fournisseurs</a>
+  <a href="gestionfournisseur.php">Retour aux catégories</a>
   <a href="../conf/logout.php">Log out</a>
   <div class="background-animation">
     <div class="bubble"></div>
@@ -47,16 +43,17 @@ $result = $conn->query($sql);
     <div class="bubble"></div>
   </div>
 </div>
+
 <div class="main-content">
   <div class="container">
     <div class="header">
-      <h1>Gestion des Stocks</h1>
-      <a href="#add-form" class="add-btn">ajouter un produit</a>
+      <h1>Commandes Fournisseurs - Aliments</h1>
+      <a href="#add-form" class="add-btn">Commander un produit</a>
     </div>
 
     <div class="table-header">
       <div class="col col-product">Produit</div>
-      <div class="col col-quantity">Quantité</div>
+      <div class="col col-quantity">Quantité commandée</div>
       <div class="col col-price">Prix unitaire</div>
       <div class="col col-status">Statut</div>
       <div class="col col-actions">Actions</div>
@@ -65,7 +62,7 @@ $result = $conn->query($sql);
     <?php while($row = $result->fetch_assoc()): ?>
       <div class="product-row">
         <div class="col col-product">
-          <div class="product-name">Produit n° <?php echo htmlspecialchars($row['reference']); ?></div>
+          <div class="product-name">Commande n° <?php echo htmlspecialchars($row['reference']); ?></div>
           <div class="product-ref"><?php echo htmlspecialchars($row['nom']); ?></div>
         </div>
 
@@ -81,25 +78,25 @@ $result = $conn->query($sql);
           <?php
           $status_class = '';
           $status_text = '';
-          if($row['quantite'] > 100) {
-            $status_class = 'en-stock';
-            $status_text = 'En stock';
-          } elseif($row['quantite'] > 20) {
-            $status_class = 'faible-stock';
-            $status_text = 'Faible en stock';
-          } else {
+          if($row['statut'] == 'en_attente') {
             $status_class = 'rupture-stock';
-            $status_text = 'En rupture';
+            $status_text = 'En attente';
+          } elseif($row['statut'] == 'confirme') {
+            $status_class = 'faible-stock';
+            $status_text = 'Confirmé';
+          } else {
+            $status_class = 'en-stock';
+            $status_text = 'Livré';
           }
           ?>
           <span class="status-badge <?php echo $status_class; ?>">
-                            <?php echo $status_text; ?>
-                        </span>
+                        <?php echo $status_text; ?>
+                    </span>
         </div>
 
         <div class="col col-actions">
-          <a href="../utilities/edit_product.php?id=<?php echo $row['id']; ?>" class="btn btn-edit">modify</a>
-          <a href="../utilities/delete_product.php?id=<?php echo $row['id']; ?>" class="btn btn-delete">Supprimer</a>
+          <a href="../utilities/edit_product.php?id=<?php echo $row['id']; ?>" class="btn btn-edit">Modifier</a>
+          <a href="../utilities/delete_product.php?id=<?php echo $row['id']; ?>" class="btn btn-delete">Annuler</a>
         </div>
       </div>
     <?php endwhile; ?>
@@ -109,10 +106,10 @@ $result = $conn->query($sql);
 <div id="add-form" class="form-container">
   <div class="form-content">
     <a href="#" class="close-btn">&times;</a>
-    <h2>ajouter un produit</h2>
+    <h2>Commander un produit</h2>
     <form method="POST" action="">
       <div class="form-group">
-        <label>ID</label>
+        <label>Référence commande</label>
         <input type="text" name="reference" required>
       </div>
       <div class="form-group">
@@ -120,14 +117,14 @@ $result = $conn->query($sql);
         <input type="text" name="nom" required>
       </div>
       <div class="form-group">
-        <label>Quanti</label>
+        <label>Quantité à commander</label>
         <input type="number" name="quantite" required>
       </div>
       <div class="form-group">
-        <label>Prix (MAD)</label>
-        <input type="number" name="prix_unitaire" required>
+        <label>Prix unitaire (MAD)</label>
+        <input type="number" name="prix_unitaire" step="0.01" required>
       </div>
-      <button type="submit" class="submit-btn">Ajouter</button>
+      <button type="submit" class="submit-btn">Commander</button>
     </form>
   </div>
 </div>

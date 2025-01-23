@@ -134,8 +134,8 @@
     <h1>Bienvenue !</h1>
     <p>Veuillez vous connecter ou vous inscrire pour continuer.</p>
     <div class="buttons">
-        <a href="login.html">Se connecter</a>
-        <a href="register.html">S'inscrire</a>
+        <a href="../conf/login.php">Se connecter</a>
+        <a href="../conf/register.php">S'inscrire</a>
     </div>
 </div>
 </body>
